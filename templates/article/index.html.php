@@ -7,8 +7,8 @@
         <p class="fs-5"><?= $article->getContent() ?></p>
         <p class="fs-5 mt-5">Auteur : <?= $article->getAuthor()->getUsername() ?></p>
         <a href="?type=article&action=show&id=<?= $article->getId() ?>" class="btn btn-primary">Voir</a>
-        <a href="?type=article&action=edit&id=<?= $article->getId() ?>" class="btn btn-secondary">Modifier</a>
-        <a href="?type=article&action=delete&id=<?= $article->getId() ?>" class="btn btn-warning">Supprimer</a>
+        <a href="?type=article&action=update&id=<?= $article->getId() ?>" class="btn btn-warning">Modifier</a>
+        <a href="?type=article&action=delete&id=<?= $article->getId() ?>" class="btn btn-danger">Supprimer</a>
 
 
 

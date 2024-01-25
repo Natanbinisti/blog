@@ -2,26 +2,28 @@
 
 namespace App\Controller;
 
-
-
-use App\Repository\ArticleRepository;
 use App\Entity\Article;
+use App\Repository\ArticleRepository;
+use Core\Controller\Controller;
 use Core\Http\Response;
 
-class ArticleController extends \Core\Controller\Controller
+class ArticleController extends Controller
 {
+
+
+
     public function index():Response
     {
 
+
         $articleRepository = new ArticleRepository();
 
-
-
-        return $this->render("articles/index", [
-            "pageTitle"=> "Tous les Articles", "articles"=>$articleRepository->findAll()
+        return $this->render("article/index", [
+            "pageTitle"=>"Les articles",
+            "articles"=>$articleRepository->findAll()
         ]);
-
     }
+
 
     public function show():Response
     {
@@ -31,9 +33,7 @@ class ArticleController extends \Core\Controller\Controller
             $id = $_GET['id'];
         }
 
-        if(!$id){
-            return  $this->redirect();
-        }
+        if(!$id){ return  $this->redirect();}
 
         $articleRepository = new ArticleRepository();
         $article = $articleRepository->find($id);
@@ -42,39 +42,21 @@ class ArticleController extends \Core\Controller\Controller
             return  $this->redirect();
         }
 
-        return $this->render("articles/show",[
+
+        return $this->render("article/show",[
             "pageTitle"=>$article->getTitle(),
             "article"=> $article
         ]);
-
-    }
-
-    public function delete():Response
-    {
-        $id = null;
-
-        if(!empty($_GET['id']) && ctype_digit($_GET['id'])){
-            $id = $_GET['id'];
-        }
-
-        if(!$id){
-            return  $this->redirect();
-        }
-
-        $articleRepository = new ArticleRepository();
-        $article = $articleRepository->find($id);
-
-        if(!$article){
-            return  $this->redirect();
-        }
-
-        $articleRepository->delete($article);
-
-        return $this->redirect("?type=article&action=index");
     }
 
     public function create():Response
     {
+        if(!$this->getUser()){
+
+            $this->addFlash("c'est pas toi", "warning");
+            return  $this->redirect("?type=article&action=index");
+        }
+
         $title = null;
         $content = null;
 
@@ -86,6 +68,7 @@ class ArticleController extends \Core\Controller\Controller
             $content = $_POST['content'];
         }
 
+
         if($title && $content)
         {
 
@@ -93,55 +76,66 @@ class ArticleController extends \Core\Controller\Controller
 
             $article->setTitle($title);
             $article->setContent($content);
+            $article->setAuthor($this->getUser());
 
             $articleRepository = new ArticleRepository();
 
             $article =  $articleRepository->save($article);
 
-            return $this->redirect("?type=article&action=index");
+            return $this->redirect("?type=article&action=show&id=".$article->getId());
 
 
         }
 
-        return $this->render("articles/create", [
+        return $this->render("article/create", [
             "pageTitle"=>"Nouvel Article"
         ]);
     }
 
-    public function edit():Response
+    public function update():Response
     {
+
+        if(!$this->getUser()){
+
+            $this->addFlash("C'est pas toi'", "warning");
+            return  $this->redirect("?type=article&action=index");
+        }
         $idArticle = null;
         $title = null;
         $content = null;
 
-        if (!empty($_POST['idArticle']) && ctype_digit($_POST['idArticle'])) {
+        if(!empty($_POST['idArticle']) && ctype_digit($_POST['idArticle'])){
             $idArticle = $_POST['idArticle'];
         }
 
-        if (!empty($_POST['title'])) {
+        if(!empty($_POST['title'])){
             $title = $_POST['title'];
         }
 
-        if (!empty($_POST['content'])) {
+        if(!empty($_POST['content'])){
             $content = $_POST['content'];
         }
 
-        if ($title && $content && $idArticle) {
+
+        if($title && $content && $idArticle)
+        {
             $articleRepository = new ArticleRepository();
             $article = $articleRepository->find($idArticle);
 
-            if (!$article) {
-                return $this->redirect();
-            }
+            if(!$article){return $this->redirect();}
 
             $article->setTitle($title);
             $article->setContent($content);
 
             $articleRepository->edit($article);
 
-            return $this->redirect("?type=article&action=index");
+            return $this->redirect("?type=article&action=show&id=".$article->getId());
+
+
 
         }
+
+
 
         $id = null;
 
@@ -149,9 +143,7 @@ class ArticleController extends \Core\Controller\Controller
             $id = $_GET['id'];
         }
 
-        if(!$id){
-            return $this->redirect();
-        }
+        if(!$id){ return  $this->redirect();}
 
         $articleRepository = new ArticleRepository();
         $article = $articleRepository->find($id);
@@ -160,15 +152,43 @@ class ArticleController extends \Core\Controller\Controller
             return  $this->redirect();
         }
 
-        return $this->render("articles/edit",[
+
+        return $this->render("article/update",[
             "pageTitle"=>$article->getTitle(),
             "article"=> $article
         ]);
 
-
     }
 
+    public function delete():Response
+    {
+        if(!$this->getUser()){
 
+            $this->addFlash("C'est pas toi", "warning");
+            return  $this->redirect("?type=article&action=index");
+        }
+        $id = null;
+
+        if(!empty($_GET['id']) && ctype_digit($_GET['id'])){
+            $id = $_GET['id'];
+        }
+
+        if(!$id){ return  $this->redirect();}
+
+        $articleRepository = new ArticleRepository();
+        $article = $articleRepository->find($id);
+
+        if(!$article){
+            $this->addFlash("pas trouvé cet article que vous voulez supprimer", "danger");
+            return  $this->redirect();
+        }
+
+        $this->addFlash("article bien supprimé bravo");
+        $articleRepository->delete($article);
+
+        return  $this->redirect("?type=article&action=index");
+
+    }
 
 
 }

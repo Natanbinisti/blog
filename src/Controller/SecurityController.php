@@ -6,24 +6,32 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Core\Controller\Controller;
 use Core\Http\Response;
+use Core\Session\Session;
 
 class SecurityController extends Controller
 {
+
     public function register():Response
     {
+
         $username = null;
         $unencryptedPassword = null;
+        if(!empty($_POST['username'])) {
+            $username = $_POST['username'];
+        }
+        if(!empty($_POST['password'])) {
+            $unencryptedPassword = $_POST['password'];
+        }
 
-        if(!empty($_POST['username'])) {$username = $_POST['username'];}
-        if(!empty($_POST['password'])) {$unencryptedPassword = $_POST['password'];}
-
-        if($username && $unencryptedPassword) {
+        if($username && $unencryptedPassword)
+        {
             $userRepository = new UserRepository();
 
             $userExistant = $userRepository->findByUsername($username);
 
             if($userExistant){
 
+                $this->addFlash("username déja utilisé","warning");
                 return $this->redirect("?type=security&action=register");
             }
 
@@ -33,55 +41,64 @@ class SecurityController extends Controller
 
             $userRepository->save($user);
 
+            $this->addFlash("success" ,"success");
+            return $this->redirect("?type=article&action=index");
 
-            return $this->redirect();
+
         }
 
+
         return $this->render("user/register", [
-            "pageTitle"=> "Nouveau compte"
+            "pageTitle"=> "New profile"
         ]);
     }
 
-    public function login():Response
+    public function signIn():Response
     {
-
         $username = null;
         $unencryptedPassword = null;
-        if (!empty($_POST['username'])) {
+        if(!empty($_POST['username'])) {
             $username = $_POST['username'];
         }
-        if (!empty($_POST['password'])) {
+        if(!empty($_POST['password'])) {
             $unencryptedPassword = $_POST['password'];
         }
 
-        if ($username && $unencryptedPassword) {
+        if($username && $unencryptedPassword) {
             $userRepository = new UserRepository();
 
             $user = $userRepository->findByUsername($username);
 
             if (!$user) {
 
-                $this->addFlash("nom d'utilisateur inconnu", "danger");
+                $this->addFlash("wrong username", "danger");
                 return $this->redirect("?type=security&action=signIn");
             }
 
-            if (!$user->logIn($unencryptedPassword)) {
-                $this->addFlash("mot de passe incorrect ", "danger");
+            if(!$user->logIn($unencryptedPassword))
+            {
+                $this->addFlash("wrog password, ".$user->getUsername(), "danger");
                 return $this->redirect("?type=security&action=signIn");
             }
 
 
-            $this->addFlash("Bienvenue " . $user->getUsername(), "success");
+            $this->addFlash("Coucou ".$user->getUsername() ,"success");
             return $this->redirect("?type=article&action=index");
 
         }
 
-
-
-
-        return $this->render("user/login", [
+        return $this->render("user/signin", [
             "pageTitle"=> "Connexion"
         ]);
     }
+
+
+    public function signOut():Response
+    {
+        Session::remove("user");
+        $this->addFlash("bien déconnecté, tcha-tchao", "secondary");
+        return $this->redirect("?type=article&action=index");
+    }
+
 
 }

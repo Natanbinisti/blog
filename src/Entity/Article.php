@@ -13,21 +13,24 @@ use Core\Attributes\TargetRepository;
 #[Table(name: "articles")]
 class Article
 {
+
     private int $id;
     private string $title;
     private string $content;
-
     private int $user_id;
+
 
     public function getId(): int
     {
         return $this->id;
     }
 
+
     public function getTitle(): string
     {
         return $this->title;
     }
+
 
     public function setTitle(string $title): void
     {
@@ -39,6 +42,7 @@ class Article
         return $this->content;
     }
 
+
     public function setContent(string $content): void
     {
         $this->content = $content;
@@ -47,15 +51,14 @@ class Article
     public function getComments(): array
     {
         $commentRepository = new CommentRepository();
-        $comments = $commentRepository->findAllByArticle($this);
-        return $comments;
+        return $commentRepository->findAllByArticle($this);
     }
-
     public function getAuthor(): User
     {
         $userRepository = new UserRepository();
         return $userRepository->find($this->user_id);
     }
+
 
     public function getUserId(): int
     {
@@ -68,7 +71,7 @@ class Article
         $this->user_id = $user_id;
     }
 
-    public function setAuthor(User $user)
+    public function setAuthor(User $user): void
     {
         $this->user_id = $user->getId();
     }

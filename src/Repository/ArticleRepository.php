@@ -11,10 +11,12 @@ use Core\Repository\Repository;
 class ArticleRepository extends Repository
 {
 
-    public function save(Article $article)
+    public function save(Article $article): object
     {
-        $query = $this->pdo->prepare("INSERT INTO $this->tableName SET title = :title, content = :content");
+
+        $query = $this->pdo->prepare("INSERT INTO $this->tableName SET title = :title, content = :content, user_id= :user_id");
         $query->execute([
+            "user_id"=>$article->getUserId(),
             "title"=>$article->getTitle(),
             "content"=>$article->getContent()
         ]);
@@ -23,8 +25,9 @@ class ArticleRepository extends Repository
 
     }
 
-    public function edit(Article $article)
+    public function edit(Article $article): object
     {
+
         $query = $this->pdo->prepare("UPDATE $this->tableName SET title = :title, content = :content WHERE id = :id");
         $query->execute([
             "id"=>$article->getId(),
@@ -33,7 +36,6 @@ class ArticleRepository extends Repository
         ]);
 
         return $this->find($article->getId());
-
 
     }
 }

@@ -1,40 +1,40 @@
+<h1>Les articles</h1>
 
 
-<div class="border border-primary rounded mb-5 p-2 ">
-    <h3><?= $article->getTitle() ?></h3>
-    <p class="fs-5"><?= $article->getContent() ?></p>
-    <p class="fs-5 mt-5">Auteur : <?= $article->getAuthor()->getUsername() ?></p>
+<div class="border border-dark mb-5">
 
-    <a href="?type=article&action=edit&id=<?= $article->getId() ?>" class="btn btn-secondary">Modifier</a>
-    <a href="?type=article&action=delete&id=<?= $article->getId() ?>" class="btn btn-warning">Supprimer</a>
-    <a href="?type=article&action=index" class="btn btn-primary">Retour</a>
+    <h2>Titre : <?= $article->getTitle() ?></h2>
+    <p>Contenu : <?= $article->getContent() ?></p>
 
+    <a href="?type=article&action=index" class="btn btn-secondary">Retour</a>
+    <a href="?type=article&action=update&id=<?= $article->getId() ?>" class="btn btn-warning">Editer</a>
+    <a href="?type=article&action=delete&id=<?= $article->getId() ?>" class="btn btn-danger">Supprimer</a>
+
+</div>
+ <h1>Les commentaires :</h1>
+<div class="mt-3">
+    <?php foreach ($article->getComments() as $comment): ?>
+
+    <div class="border border-primary mt-1 p-2">
+        <p><strong><?= $comment->getContent() ?></strong></p>
+        <p class="fs-5">Auteur : <?= $article->getAuthor()->getUsername() ?></p>
+        <a href="?type=comment&action=delete&id=<?= $comment->getId() ?>" class="btn btn-danger">Supprimer</a>
+        <a href="?type=comment&action=update&id=<?= $comment->getId() ?>" class="btn btn-warning">Editer</a>
+    </div>
+    <?php endforeach; ?>
 
 
 </div>
 
-
-<?php foreach ($article->getComments() as $comment): ?>
-    <div class="border border-warning rounded mb-3 p-1">
-        <h6 class="fs-5"><strong><?= $comment->getContent() ?></strong></h6>
-        <p class="fs-5 mt-5">Auteur : <?= $comment->getAuthor()->getUsername() ?></p>
-
-        <a href="?type=comment&action=delete&id=<?= $comment->getId() ?>" class="btn btn-danger">Supprimer</a>
-        <a href="?type=comment&action=update&id=<?= $comment->getId() ?>" class="btn btn-warning">Editer</a>
-
-    </div>
-<?php endforeach; ?>
-
-
 <div>
-    <form action="?type=comment&action=create" method="post" class="mt-5">
+    <form action="?type=comment&action=create" method="post">
 
         <div>
-            <input class="form-control" type="text" name="content" placeholder="ecrire un commentaire">
+            <input class="form-control" type="text" name="content" placeholder="your comment">
         </div>
         <input type="hidden" name="articleId" value="<?= $article->getId() ?>">
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success">Commenter</button>
+        <div>
+            <button type="submit" class="btn btn-success">send</button>
         </div>
 
     </form>

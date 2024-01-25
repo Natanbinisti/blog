@@ -5,11 +5,13 @@ namespace App\Repository;
 use App\Entity\Article;
 use App\Entity\Comment;
 use Core\Attributes\TargetEntity;
+use Core\Repository\Repository;
 
 #[TargetEntity(name: Comment::class)]
-class CommentRepository extends \Core\Repository\Repository
+class CommentRepository extends Repository
 {
-    public function findAllByArticle(Article $article)
+
+    public function findAllByArticle(Article $article): bool|array
     {
         $query = $this->pdo->prepare("SELECT * FROM $this->tableName WHERE article_id = :article_id");
         $query->execute([

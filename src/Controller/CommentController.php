@@ -2,46 +2,27 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Comment;
 use App\Repository\ArticleRepository;
 use App\Repository\CommentRepository;
+use Core\Controller\Controller;
 use Core\Http\Response;
 
-class CommentController extends \Core\Controller\Controller
+class CommentController extends Controller
 {
-    public function delete()
-    {
-        $id = null;
 
-        if(!empty($_GET['id']) && ctype_digit($_GET['id'])){
-            $id = $_GET['id'];
-        }
-
-        if(!$id){ return  $this->redirect();}
-
-
-        $commentRepository = new CommentRepository();
-        $comment = $commentRepository->find($id);
-
-        if($comment)
-        {
-            $idArticle = $comment->getArticleId();
-            $commentRepository->delete($comment);
-
-
-            return $this->redirect("?type=article&action=show&id=$idArticle");
-        }
-        return $this->redirect();
-
-
-    }
 
     public function create():Response
     {
 
         $articleId = null;
         $content = null;
+
+        if(!$this->getUser()){
+
+            $this->addFlash("C'est pas toi", "warning");
+            return  $this->redirect("?type=article&action=index");
+        }
 
         if(!empty($_POST['articleId']) && ctype_digit($_POST['articleId']))
         {
@@ -73,11 +54,48 @@ class CommentController extends \Core\Controller\Controller
         return $this->redirect("?type=article&action=index");
     }
 
+    public function delete():Response
+    {
+
+        $id = null;
+
+        if(!$this->getUser()){
+
+            $this->addFlash("C'est pas toi", "warning");
+            return  $this->redirect("?type=article&action=index");
+        }
+
+        if(!empty($_GET['id']) && ctype_digit($_GET['id'])){
+            $id = $_GET['id'];
+        }
+
+        if(!$id){ return  $this->redirect();}
+
+
+        $commentRepository = new CommentRepository();
+        $comment = $commentRepository->find($id);
+
+        if($comment)
+        {
+            $idArticle = $comment->getArticleId();
+            $commentRepository->delete($comment);
+
+
+            return $this->redirect("?type=article&action=show&id=$idArticle");
+        }
+        return $this->redirect();
+    }
+
     public function update():Response
     {
         $commentId = null;
         $content = null;
 
+        if(!$this->getUser()){
+
+            $this->addFlash("C'est pas toi", "warning");
+            return  $this->redirect("?type=article&action=index");
+        }
 
         if(!empty($_POST['id']) && ctype_digit($_POST['id']))
         {
@@ -117,6 +135,7 @@ class CommentController extends \Core\Controller\Controller
 
         if(!$id){ return  $this->redirect();}
 
+
         $commentRepository = new CommentRepository();
         $comment = $commentRepository->find($id);
 
@@ -124,11 +143,10 @@ class CommentController extends \Core\Controller\Controller
         {
 
             return $this->render("comment/edit", [
-                "pageTitle"=>"modifier",
+                "pageTitle"=>"edition comment",
                 "comment"=>$comment
             ]);
         }
         return $this->redirect();
     }
-
 }
